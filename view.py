@@ -13,107 +13,148 @@ class InventarioView:
         self.create_widgets()
 
     def create_widgets(self):
+        # Estilo para etiquetas y botones
+        style = ttk.Style()
+        style.configure('TLabel', font=('Century Gothic', 12, 'bold'), foreground='white', background='#00482b')
+        style.configure('TButton', font=('Century Gothic', 12, 'bold'), foreground='#00482b', background='white')
+        style.configure('TLabelframe', foreground='white', background='#00482b')
+        style.configure('TLabelframe.Label', font=('Century Gothic', 12, 'bold'), foreground='white', background='#00482b')
+        
+
+        # Frame para agregar producto
         self.frame_agregar = ttk.LabelFrame(self.root, text="Agregar Producto")
-        self.frame_agregar.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W+tk.E)
+        self.frame_agregar.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-        self.label_codigo = ttk.Label(self.frame_agregar, text="Código:")
-        self.label_nombre = ttk.Label(self.frame_agregar, text="Nombre:")
-        self.label_cantidad = ttk.Label(self.frame_agregar, text="Cantidad:")
-        self.label_precio = ttk.Label(self.frame_agregar, text="Precio:")
+        # Definir campos y etiquetas
+        campos = [
+            ("Código", "entry_codigo"),
+            ("Nombre", "entry_nombre"),
+            ("Cantidad", "entry_cantidad"),
+            ("PrecioUni", "entry_PrecioUni")
+        ]
 
-        self.label_codigo.grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
-        self.label_nombre.grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
-        self.label_cantidad.grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
-        self.label_precio.grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
+        # Crear etiquetas y entradas dentro del Frame
+        for i, (label_text, entry_name) in enumerate(campos):
+            label = ttk.Label(self.frame_agregar, text=label_text + ":")
+            label.grid(row=i, column=0, padx=10, pady=5, sticky=tk.E)
 
-        self.entry_codigo = ttk.Entry(self.frame_agregar)
-        self.entry_nombre = ttk.Entry(self.frame_agregar)
-        self.entry_cantidad = ttk.Entry(self.frame_agregar)
-        self.entry_precio = ttk.Entry(self.frame_agregar)
+            entry_var = tk.StringVar()
+            entry = ttk.Entry(self.frame_agregar, textvariable=entry_var, width=30)
+            entry.grid(row=i, column=1, padx=10, pady=5, sticky=tk.W)
 
-        self.entry_codigo.grid(row=0, column=1, padx=10, pady=5, sticky=tk.W)
-        self.entry_nombre.grid(row=1, column=1, padx=10, pady=5, sticky=tk.W)
-        self.entry_cantidad.grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
-        self.entry_precio.grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
+            # Asignar la entrada a un atributo de la instancia dinámicamente
+            setattr(self, entry_name, entry)
 
-        self.button_agregar = ttk.Button(self.frame_agregar, text="Agregar", command=self.agregar_producto)
-        self.button_agregar.grid(row=4, columnspan=2, padx=10, pady=10, sticky=tk.W+tk.E)
+        # Botón para agregar producto
+        self.button_agregar = ttk.Button(self.frame_agregar, text="Agregar Producto", command=self.agregar_producto)
+        self.button_agregar.grid(row=len(campos), columnspan=2, padx=150, pady=10, sticky=tk.W+tk.E)
 
-        self.frame_operaciones = ttk.LabelFrame(root, text="Operaciones")
-        self.frame_operaciones.grid(row=1, column=0, padx=10, pady=10, sticky=tk.W+tk.E)
+        # Frame para operaciones
+        self.frame_operaciones = ttk.LabelFrame(self.root, text="Operaciones")
+        self.frame_operaciones.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-        self.button_buscar = ttk.Button(self.frame_operaciones, text="Buscar", command=self.buscar_producto)
-        self.button_buscar.grid(row=0, column=0, padx=10, pady=5, sticky=tk.W+tk.E)
+        # Botones de operaciones
+        self.button_buscar = ttk.Button(self.frame_operaciones, text="Buscar Producto", command=self.buscar_producto)
+        self.button_buscar.pack(side=tk.LEFT, padx=10, pady=5)
 
         self.button_listar = ttk.Button(self.frame_operaciones, text="Listar Todos", command=self.listar_productos)
-        self.button_listar.grid(row=0, column=1, padx=10, pady=5, sticky=tk.W+tk.E)
+        self.button_listar.pack(side=tk.LEFT, padx=10, pady=5)
 
-        self.button_eliminar = ttk.Button(self.frame_operaciones, text="Eliminar", command=self.eliminar_producto)
-        self.button_eliminar.grid(row=0, column=2, padx=10, pady=5, sticky=tk.W+tk.E)
-
+        self.button_eliminar = ttk.Button(self.frame_operaciones, text="Eliminar Producto", command=self.eliminar_producto)
+        self.button_eliminar.pack(side=tk.LEFT, padx=10, pady=5)
 
     def agregar_producto(self):
+        # Obtener valores de las entradas
         codigo = self.entry_codigo.get().strip()
         nombre = self.entry_nombre.get().strip()
         cantidad = self.entry_cantidad.get().strip()
-        precio = self.entry_precio.get().strip()
+        PrecioUni = self.entry_PrecioUni.get().strip()
 
-        if not codigo or not nombre or not cantidad or not precio:
+        # Validar campos requeridos
+        if not codigo or not nombre or not cantidad or not PrecioUni:
             messagebox.showerror("Error", "Todos los campos son requeridos.")
             return
 
+        # Validar formato de cantidad y PrecioUni
         try:
             cantidad = int(cantidad)
-            precio = float(precio)
+            PrecioUni = float(PrecioUni)
         except ValueError:
-            messagebox.showerror("Error", "Cantidad y precio deben ser números enteros o decimales.")
+            messagebox.showerror("Error", "Cantidad y PrecioUni deben ser números enteros o decimales válidos.")
             return
 
-        if self.controller.agregar_producto(codigo, nombre, cantidad, precio):
+        # Agregar producto usando el controlador
+        if self.controller.agregar_producto(codigo, nombre, cantidad, PrecioUni):
             messagebox.showinfo("Éxito", f"Producto '{nombre}' agregado al inventario.")
+            self.clear_entries()
         else:
             messagebox.showerror("Error", f"El producto con código {codigo} ya existe en el inventario.")
-    
+
     def buscar_producto(self):
+        # Obtener código del producto a buscar
         codigo = self.entry_codigo.get().strip()
         if not codigo:
             messagebox.showerror("Error", "Ingrese un código para buscar.")
             return
 
-        
+        # Buscar producto usando el controlador
         producto = self.controller.buscar_producto(codigo)
         if producto:
-            nombre, cantidad, precio = producto
-            messagebox.showinfo("Información", f"Nombre: {nombre}\nCantidad: {cantidad}\nPrecio: ${precio:.2f}")
+            nombre, cantidad, PrecioUni = producto
+            messagebox.showinfo("Información", f"Nombre: {nombre}\tCantidad: {cantidad}\tPrecioUni: ${PrecioUni:.2f}")
         else:
             messagebox.showerror("Error", f"No se encontró ningún producto con el código {codigo}.")
 
     def listar_productos(self):
-
+        # Obtener lista de todos los productos
         productos = self.controller.listar_productos()
         if productos:
-            lista_productos = "Inventario:\n"
-            for producto in productos:
-                lista_productos += f"Código: {producto[0]}, Nombre: {producto[1]}, Cantidad: {producto[2]}, Precio: ${producto[3]:.2f}\n"
-            messagebox.showinfo("Lista de Productos", lista_productos)
+            # Crear una nueva ventana para mostrar la lista de productos como una tabla
+            lista_window = tk.Toplevel(self.root)
+            lista_window.title("Lista de Productos")
+
+            ttk.Style().configure("Treeview", foreground='#00482b', background='white', font=('Century Gothic', 12))
+            ttk.Style().configure("Treeview.Cell", anchor="center")
+
+            table = ttk.Treeview(lista_window, columns=("Código", "Nombre", "Cantidad", "PrecioUni"), show="headings")
+            table.heading("Código", text="Código")
+            table.heading("Nombre", text="Nombre")
+            table.heading("Cantidad", text="Cantidad")
+            table.heading("PrecioUni", text="PrecioUni")
+            
+
+            for codigo, nombre, cantidad, PrecioUni in productos:
+                table.insert("", "end", values=(codigo, nombre, cantidad, f"${PrecioUni:.2f}"))
+
+            table.pack(fill="both", expand=True)
         else:
             messagebox.showinfo("Lista de Productos", "El inventario está vacío.")
 
     def eliminar_producto(self):
+        # Obtener código del producto a eliminar
         codigo = self.entry_codigo.get().strip()
         if not codigo:
             messagebox.showerror("Error", "Ingrese un código para eliminar.")
             return
 
+        # Eliminar producto usando el controlador
         if self.controller.eliminar_producto(codigo):
             messagebox.showinfo("Éxito", f"Producto con código {codigo} eliminado del inventario.")
+            self.clear_entries()
         else:
             messagebox.showerror("Error", f"No se encontró ningún producto con el código {codigo}.")
+
+    def clear_entries(self):
+        # Limpiar los valores de las entradas después de completar una acción
+        for entry_name in ["entry_codigo", "entry_nombre", "entry_cantidad", "entry_PrecioUni"]:
+            getattr(self, entry_name).delete(0, tk.END)
 
     def run(self):
         self.root.mainloop()
 
 if __name__ == "__main__":
     root = tk.Tk()
+    root.config(background='#00482b')
+    root.resizable(False,False)
     app = InventarioView(root)
     app.run()

@@ -26,7 +26,7 @@ class InventarioModel:
         return self.c.fetchone()
 
     def listar_productos(self):
-        self.c.execute('''SELECT codigo, nombre, cantidad, precio FROM productos''')
+        self.c.execute('''SELECT codigo, nombre, cantidad, precio FROM productos ORDER BY codigo''')
         return self.c.fetchall()
 
     def eliminar_producto(self, codigo):
